@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartService {
@@ -31,12 +32,19 @@ public class CartService {
         Book book = bookRepository.findById(bookId)
                                   .orElseThrow(() -> new RuntimeException("Cart not Found"));
 
-        CartItem cartItem = new CartItem();
-        cartItem.setCart(cart);
-        cartItem.setBook(book);
-        cartItem.setQuantity(quantity);
+        Optional<CartItem> existingItem = cartItemRepository.findByCartCartIdAndBookBookId(cartId, bookId);
 
-        return cartItemRepository.save(cartItem);
+        if (existingItem.isPresent()) {
+            CartItem item = existingItem.get();
+            item.setQuantity(item.getQuantity() + quantity);
+            return cartItemRepository.save(item);
+        } else {
+            CartItem cartItem = new CartItem();
+            cartItem.setCart(cart);
+            cartItem.setBook(book);
+            cartItem.setQuantity(quantity);
+            return cartItemRepository.save(cartItem);
+        }
     }
 
     public List<CartItem> getAllCartItems(Long cartId){

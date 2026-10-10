@@ -57,6 +57,8 @@ public class CartServiceTest {
 
         when(cartRepository.findById(cartId)).thenReturn(Optional.of(cart));
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(cartItemRepository.findByCartCartIdAndBookBookId(cartId, bookId))
+                .thenReturn(Optional.empty());
         when(cartItemRepository.save(any(CartItem.class))).thenReturn(savedCartItem);
 
         //When: Book added to cart
@@ -67,6 +69,44 @@ public class CartServiceTest {
         assertEquals(book, actualCartItem.getBook());
         assertEquals(quantity, actualCartItem.getQuantity());
     }
+
+    @Test
+    void shouldUpdateQuantityWhenBookAlreadyInCart() {
+        // Given: Cart and book exist
+        Long cartId = 100L;
+        Long bookId = 1L;
+
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+
+        Book book = new Book(
+                bookId,
+                "Kalki Purana (Part-8)",
+                "Kalki",
+                new BigDecimal("200.00"),
+                10
+        );
+
+        CartItem existingCartItem = new CartItem(1L, cart, book, 2);
+
+        when(cartRepository.findById(cartId)).thenReturn(Optional.of(cart));
+        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
+        when(cartItemRepository.findByCartCartIdAndBookBookId(cartId, bookId))
+                .thenReturn(Optional.of(existingCartItem));
+        when(cartItemRepository.save(existingCartItem)).thenReturn(existingCartItem);
+
+        // When: Add same book again with quantity 3
+        CartItem updatedCartItem = cartService.addBookToCart(cartId, bookId, 3);
+
+        // Then: Quantity is incremented (2 + 3 = 5)
+        assertEquals(5, updatedCartItem.getQuantity());
+        assertEquals(book, updatedCartItem.getBook());
+        assertEquals(cart, updatedCartItem.getCart());
+
+        // Verify save was called
+        verify(cartItemRepository).save(existingCartItem);
+    }
+
 
     @Test
     void shouldReturnAllCartItems(){
