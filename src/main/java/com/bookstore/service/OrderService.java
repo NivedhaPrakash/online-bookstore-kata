@@ -1,6 +1,9 @@
 package com.bookstore.service;
 
 import com.bookstore.entity.*;
+import com.bookstore.exception.CartNotFoundException;
+import com.bookstore.exception.EmptyCartException;
+import com.bookstore.exception.InsufficientStockException;
 import com.bookstore.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,17 +35,17 @@ public class OrderService {
     public Order checkout(Long cartId){
 
         Cart cart = cartRepository.findById(cartId)
-                                  .orElseThrow(() -> new RuntimeException("Cart not found"));
+                                  .orElseThrow(() -> new CartNotFoundException("Cart Not Found"));
 
         List<CartItem> cartItems = cartItemRepository.findByCartCartId(cart.getCartId());
 
         if (cartItems.isEmpty()) {
-            throw new RuntimeException("Cannot checkout an empty cart");
+            throw new EmptyCartException("Cannot Checkout An Empty Cart");
         }
 
         for (CartItem item : cartItems) {
             if (item.getQuantity() > item.getBook().getAvailableStock()) {
-                throw new RuntimeException("Insufficient stock for book: " + item.getBook().getTitle());
+                throw new InsufficientStockException("Insufficient Stock For Book : " + item.getBook().getTitle());
             }
         }
 

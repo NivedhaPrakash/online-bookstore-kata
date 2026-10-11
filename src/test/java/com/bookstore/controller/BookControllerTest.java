@@ -1,6 +1,7 @@
 package com.bookstore.controller;
 
 import com.bookstore.entity.Book;
+import com.bookstore.exception.UnauthorizedException;
 import com.bookstore.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,6 +90,30 @@ public class BookControllerTest {
 
         //When and Then
         mockMvc.perform(get("/api/books/{bookId}",1L))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Book Not Found"));;
+    }
+
+    @Test
+    void testShouldReturnUnauthorizedAccess() throws Exception {
+        when(bookService.getBookById(1L))
+                .thenThrow(new UnauthorizedException("User Not Authenticated"));
+
+        mockMvc.perform(get("/api/books/{id}",1L))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.message").value("User Not Authenticated"));
+    }
+
+    @Test
+    void testShouldReturnInternalServerError() throws Exception {
+        when(bookService.getBookById(1L))
+                .thenThrow(new RuntimeException("Unexpected Error"));
+
+        mockMvc.perform(get("/api/books/{id}",1L))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.message").value("Unexpected Error"));
     }
 }

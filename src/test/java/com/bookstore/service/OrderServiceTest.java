@@ -1,6 +1,9 @@
 package com.bookstore.service;
 
 import com.bookstore.entity.*;
+import com.bookstore.exception.CartNotFoundException;
+import com.bookstore.exception.EmptyCartException;
+import com.bookstore.exception.InsufficientStockException;
 import com.bookstore.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,11 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -96,4 +99,57 @@ public class OrderServiceTest {
         assertEquals(5, secondBook.getAvailableStock());
         verify(bookRepository, times(2)).save(any(Book.class));
     }
+
+    @Test
+    void shouldThrowNotFoundException() {
+        // Given: cart does not exist
+        when(cartRepository.findById(100L)).thenReturn(Optional.empty());
+
+        // When & Then
+        CartNotFoundException ex = assertThrows(CartNotFoundException.class,
+                () -> orderService.checkout(100L));
+
+        assertEquals("Cart Not Found", ex.getMessage());
+    }
+
+    @Test
+    void givenEmptyCart_whenCheckout_thenThrowEmptyCartException() {
+        // Given: cart exists but has no items
+        Cart cart = new Cart();
+        cart.setCartId(100L);
+        when(cartRepository.findById(100L)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartCartId(100L)).thenReturn(List.of());
+
+        // When & Then
+        EmptyCartException ex = assertThrows(EmptyCartException.class,
+                () -> orderService.checkout(100L));
+
+        assertEquals("Cannot Checkout An Empty Cart", ex.getMessage());
+    }
+
+    @Test
+    void givenInsufficientStock_whenCheckout_thenThrowInsufficientStockException() {
+        // Given: cart exists with one item but stock is insufficient
+        Cart cart = new Cart();
+        cart.setCartId(100L);
+
+        Book book = new Book(
+                1L,
+                "Kalki Purana (Part-8)",
+                "Kalki",
+                new BigDecimal("200.00"),
+                1
+        );
+        CartItem cartItem = new CartItem(1L, cart, book, 5);
+
+        when(cartRepository.findById(100L)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartCartId(100L)).thenReturn(List.of(cartItem));
+
+        // When & Then
+        InsufficientStockException ex = assertThrows(InsufficientStockException.class,
+                () -> orderService.checkout(100L));
+
+        assertEquals("Insufficient Stock For Book : Kalki Purana (Part-8)", ex.getMessage());
+    }
+
 }
