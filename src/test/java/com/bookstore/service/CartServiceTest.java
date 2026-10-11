@@ -1,6 +1,8 @@
 package com.bookstore.service;
 
 import com.bookstore.entity.*;
+import com.bookstore.exception.BookNotFoundException;
+import com.bookstore.exception.CartNotFoundException;
 import com.bookstore.repository.BookRepository;
 import com.bookstore.repository.CartItemRepository;
 import com.bookstore.repository.CartRepository;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -206,4 +209,46 @@ public class CartServiceTest {
         verify(cartItemRepository).deleteById(1L);
 
     }
+    @Test
+    void shouldThrowWhenBookNotFound() {
+        // Given: cart exists but book does not
+        Cart cart = new Cart();
+        cart.setCartId(100L);
+        when(cartRepository.findById(100L)).thenReturn(Optional.of(cart));
+        when(bookRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // When: trying to add book to cart
+        BookNotFoundException ex = assertThrows(BookNotFoundException.class,
+                () -> cartService.addBookToCart(100L, 1L, 2));
+
+        // Then: exception is thrown
+        assertEquals("Book Not Found", ex.getMessage());
+    }
+
+    @Test
+    void shouldThrowWhenUpdatingNonExistingCartItem() {
+        // Given: cart item does not exist
+        when(cartItemRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When: trying to update non-existing cart item
+        CartNotFoundException ex = assertThrows(CartNotFoundException.class,
+                () -> cartService.updateCartItemQuantity(999L, 3));
+
+        // Then: exception is thrown
+        assertEquals("Cart Item Not Found", ex.getMessage());
+    }
+
+    @Test
+    void shouldThrowWhenRemovingNonExistingCartItem() {
+        // Given: cart item does not exist
+        when(cartItemRepository.existsById(999L)).thenReturn(false);
+
+        // When: trying to remove non-existing cart item
+        CartNotFoundException ex = assertThrows(CartNotFoundException.class,
+                () -> cartService.removeCartItem(999L));
+
+        // Then: exception is thrown
+        assertEquals("Cart Item Not Found", ex.getMessage());
+    }
+
 }

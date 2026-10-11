@@ -3,8 +3,10 @@ package com.bookstore.controller;
 import com.bookstore.entity.Book;
 import com.bookstore.entity.Cart;
 import com.bookstore.entity.CartItem;
+import com.bookstore.exception.CartNotFoundException;
 import com.bookstore.service.CartService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -152,5 +154,35 @@ public class CartControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(cartService).removeCartItem(1L);
+    }
+
+    @Test
+    void testReturnBadRequestForInvalidQuantity() throws Exception {
+        mockMvc.perform(put("/api/carts/items/{cartItemId}",1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"quantity\": 0}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("must be greater than or equal to 1"));
+    }
+
+    @Test
+    void shouldReturnCartNotFound() throws Exception {
+        Mockito.when(cartService.addBookToCart(anyLong(),anyLong(),anyInt()))
+                .thenThrow(new CartNotFoundException("Cart Not Found"));
+
+        String requestBody = """
+                {
+                "bookId": 1,
+                "quantity": 2
+                }
+                """;
+
+        mockMvc.perform(post("/api/carts/{cartId}/items", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Cart Not Found"));
     }
 }

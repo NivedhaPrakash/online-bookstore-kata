@@ -3,6 +3,8 @@ package com.bookstore.service;
 import com.bookstore.entity.Book;
 import com.bookstore.entity.Cart;
 import com.bookstore.entity.CartItem;
+import com.bookstore.exception.BookNotFoundException;
+import com.bookstore.exception.CartNotFoundException;
 import com.bookstore.repository.BookRepository;
 import com.bookstore.repository.CartItemRepository;
 import com.bookstore.repository.CartRepository;
@@ -27,10 +29,10 @@ public class CartService {
     public CartItem addBookToCart(Long cartId, Long bookId, Integer quantity){
 
         Cart cart = cartRepository.findById(cartId)
-                                  .orElseThrow(() -> new RuntimeException("Cart not Found"));
+                                  .orElseThrow(() -> new CartNotFoundException("Cart Not Found"));
 
         Book book = bookRepository.findById(bookId)
-                                  .orElseThrow(() -> new RuntimeException("Cart not Found"));
+                                  .orElseThrow(() -> new BookNotFoundException("Book Not Found"));
 
         Optional<CartItem> existingItem = cartItemRepository.findByCartCartIdAndBookBookId(cartId, bookId);
 
@@ -49,7 +51,7 @@ public class CartService {
 
     public List<CartItem> getAllCartItems(Long cartId){
         Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Cart not Found"));
+                .orElseThrow(() -> new CartNotFoundException("Cart Not Found"));
 
         List<CartItem> cartItemList = cartItemRepository.findByCartCartId(cart.getCartId());
         return cartItemList;
@@ -57,7 +59,7 @@ public class CartService {
 
     public CartItem updateCartItemQuantity(Long cartItemId, Integer quantity){
         CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new RuntimeException("cart item not found"));
+                .orElseThrow(() -> new CartNotFoundException("Cart Item Not Found"));
         cartItem.setQuantity(quantity);
         return  cartItemRepository.save(cartItem);
     }
@@ -65,7 +67,7 @@ public class CartService {
     public void removeCartItem(Long cartItemId){
         boolean cartItemExists = cartItemRepository.existsById(cartItemId);
         if(!cartItemExists) {
-            throw new RuntimeException("cart item not found");
+            throw new CartNotFoundException("Cart Item Not Found");
         }
         cartItemRepository.deleteById(cartItemId);
     }
