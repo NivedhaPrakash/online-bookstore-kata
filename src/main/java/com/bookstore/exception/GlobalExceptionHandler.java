@@ -83,5 +83,21 @@ public class GlobalExceptionHandler {
         errorResponse.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
+
+    @ExceptionHandler(UserNameNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNameNotFound(UserNameNotFoundException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(BadCredentialsException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
 }
 
