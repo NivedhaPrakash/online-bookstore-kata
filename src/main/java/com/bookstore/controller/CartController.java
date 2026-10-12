@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,15 +24,17 @@ public class CartController {
     public ResponseEntity<CartItem> addBookToCart(
             @PathVariable Long cartId,@Valid @RequestBody AddCartItemRequest request){
 
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         CartItem cartItem = cartService.addBookToCart(
-                cartId, request.getBookId(), request.getQuantity());
+                cartId, request.getBookId(), request.getQuantity(),username);
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(cartItem);
     }
 
     @GetMapping("/{cartId}/items")
     public ResponseEntity<List<CartItem>> retrieveAllCartItems(@PathVariable Long cartId){
-        List<CartItem> cartItemList = cartService.getAllCartItems(cartId);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<CartItem> cartItemList = cartService.getAllCartItems(cartId,username);
         return ResponseEntity.ok(cartItemList);
     }
 
@@ -39,14 +42,15 @@ public class CartController {
     public ResponseEntity<CartItem> updateCartItemQuantity(
             @PathVariable Long cartItemId,
             @Valid @RequestBody UpdateQuantityRequest request) {
-
-        CartItem updateCartItem = cartService.updateCartItemQuantity(cartItemId, request.getQuantity());
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        CartItem updateCartItem = cartService.updateCartItemQuantity(cartItemId, request.getQuantity(),username);
         return ResponseEntity.ok(updateCartItem);
     }
 
     @DeleteMapping("/items/{cartItemId}")
     public ResponseEntity<Void> removeCartItem(@PathVariable Long cartItemId) {
-        cartService.removeCartItem(cartItemId);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        cartService.removeCartItem(cartItemId,username);
         return ResponseEntity.noContent().build();
     }
 }

@@ -4,6 +4,7 @@ import com.bookstore.entity.*;
 import com.bookstore.exception.CartNotFoundException;
 import com.bookstore.exception.EmptyCartException;
 import com.bookstore.exception.InsufficientStockException;
+import com.bookstore.exception.UnauthorizedException;
 import com.bookstore.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +33,16 @@ public class OrderService {
     private BookRepository bookRepository;
 
     @Transactional
-    public Order checkout(Long cartId){
+    public Order checkout(Long cartId, String username){
 
         Cart cart = cartRepository.findById(cartId)
                                   .orElseThrow(() -> new CartNotFoundException("Cart Not Found"));
 
         List<CartItem> cartItems = cartItemRepository.findByCartCartId(cart.getCartId());
+
+        if (!cart.getUser().getUsername().equals(username)) {
+            throw new UnauthorizedException("You cannot checkout another user's cart");
+        }
 
         if (cartItems.isEmpty()) {
             throw new EmptyCartException("Cannot Checkout An Empty Cart");
@@ -55,6 +60,7 @@ public class OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Order order = new Order();
+        order.setUser(cart.getUser());
         order.setTotalAmount(totalAmount);
         order.setStatus(OrderStatus.PLACED);
         order.setCreatedAt(LocalDateTime.now());

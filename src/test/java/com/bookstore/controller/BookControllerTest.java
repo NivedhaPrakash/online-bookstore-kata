@@ -3,6 +3,7 @@ package com.bookstore.controller;
 import com.bookstore.entity.Book;
 import com.bookstore.exception.UnauthorizedException;
 import com.bookstore.service.BookService;
+import com.bookstore.util.JwtTokenUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -29,6 +30,9 @@ public class BookControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private JwtTokenUtil jwtTokenUtil;
 
     @Test
     void testGetAllBooks() throws Exception {

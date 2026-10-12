@@ -4,6 +4,7 @@ import com.bookstore.entity.*;
 import com.bookstore.exception.CartNotFoundException;
 import com.bookstore.exception.EmptyCartException;
 import com.bookstore.exception.InsufficientStockException;
+import com.bookstore.exception.UnauthorizedException;
 import com.bookstore.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,8 +47,13 @@ public class OrderServiceTest {
     void shouldCreateOrderFromCartItems(){
         // Given: Cart with two items
         Long cartId = 100L;
+
+        User user = new User();
+        user.setUsername("nive16");
+
         Cart cart = new Cart();
         cart.setCartId(cartId);
+        cart.setUser(user);
 
         Book firstBook = new Book(
                 1L,
@@ -84,7 +90,7 @@ public class OrderServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When: Checkout is called
-        Order checkoutOrder = orderService.checkout(cartId);
+        Order checkoutOrder = orderService.checkout(cartId, "nive16");
 
         //Then
         assertEquals(new BigDecimal("1000.00"), checkoutOrder.getTotalAmount());
@@ -107,7 +113,7 @@ public class OrderServiceTest {
 
         // When & Then
         CartNotFoundException ex = assertThrows(CartNotFoundException.class,
-                () -> orderService.checkout(100L));
+                () -> orderService.checkout(100L, "nive16"));
 
         assertEquals("Cart Not Found", ex.getMessage());
     }
@@ -115,14 +121,17 @@ public class OrderServiceTest {
     @Test
     void givenEmptyCart_whenCheckout_thenThrowEmptyCartException() {
         // Given: cart exists but has no items
+        User user = new User();
+        user.setUsername("nive16");
         Cart cart = new Cart();
         cart.setCartId(100L);
+        cart.setUser(user);
         when(cartRepository.findById(100L)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartCartId(100L)).thenReturn(List.of());
 
         // When & Then
         EmptyCartException ex = assertThrows(EmptyCartException.class,
-                () -> orderService.checkout(100L));
+                () -> orderService.checkout(100L, "nive16"));
 
         assertEquals("Cannot Checkout An Empty Cart", ex.getMessage());
     }
@@ -130,8 +139,11 @@ public class OrderServiceTest {
     @Test
     void givenInsufficientStock_whenCheckout_thenThrowInsufficientStockException() {
         // Given: cart exists with one item but stock is insufficient
+        User user = new User();
+        user.setUsername("nive16");
         Cart cart = new Cart();
         cart.setCartId(100L);
+        cart.setUser(user);
 
         Book book = new Book(
                 1L,
@@ -147,9 +159,25 @@ public class OrderServiceTest {
 
         // When & Then
         InsufficientStockException ex = assertThrows(InsufficientStockException.class,
-                () -> orderService.checkout(100L));
+                () -> orderService.checkout(100L, "nive16"));
 
         assertEquals("Insufficient Stock For Book : Kalki Purana (Part-8)", ex.getMessage());
     }
+
+    @Test
+    void givenDifferentUserThrowUnauthorizedException() {
+        Cart cart = new Cart();
+        cart.setCartId(100L);
+        User user = new User(1L, List.of(new Order()),"otherUser", "password");
+        cart.setUser(user);
+
+        when(cartRepository.findById(100L)).thenReturn(Optional.of(cart));
+
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class,
+                () -> orderService.checkout(100L, "nive16"));
+
+        assertEquals("You cannot checkout another user's cart", ex.getMessage());
+    }
+
 
 }
