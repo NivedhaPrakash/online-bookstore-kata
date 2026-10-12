@@ -1,6 +1,5 @@
 package com.bookstore.util;
 
-import com.bookstore.entity.User;
 import com.bookstore.exception.UnauthorizedException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
