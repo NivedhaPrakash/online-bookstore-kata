@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Positive;
 public record AddCartItemRequest(
 
         @NotNull
-        @Schema(description = "ID of the book to add", example = "101")
+        @Schema(description = "ID of the book to add", example = "1")
         Long bookId,
 
         @NotNull

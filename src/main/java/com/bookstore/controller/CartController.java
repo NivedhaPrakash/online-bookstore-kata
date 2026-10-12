@@ -5,6 +5,7 @@ import com.bookstore.dto.UpdateQuantityRequest;
 import com.bookstore.entity.CartItem;
 import com.bookstore.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,10 +27,12 @@ public class CartController {
     private CartService cartService;
 
     @PostMapping("/{cartId}/items")
-    @Operation(summary = "Add book to cart", description = "Adds a book to the specified cart for the authenticated user")
+    @Operation(summary = "Add book to cart", description = "Adds a book to the specified cart for the authenticated user",
+            security = { @SecurityRequirement(name = "bearerAuth") } )
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Book added to cart successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "403", description = "Forbidden Access"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
     public ResponseEntity<CartItem> addBookToCart(
@@ -43,10 +46,12 @@ public class CartController {
     }
 
     @GetMapping("/{cartId}/items")
-    @Operation(summary = "Retrieve all cart items", description = "Fetches all items in the specified cart for the authenticated user")
+    @Operation(summary = "Retrieve all cart items", description = "Fetches all items in the specified cart for the authenticated user",
+            security = { @SecurityRequirement(name = "bearerAuth") } )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cart items retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+            @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+            @ApiResponse(responseCode = "403", description = "Forbidden Access"),
     })
     public ResponseEntity<List<CartItem>> retrieveAllCartItems(@PathVariable Long cartId){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -55,11 +60,13 @@ public class CartController {
     }
 
     @PutMapping("/items/{cartItemId}")
-    @Operation(summary = "Update cart item quantity", description = "Updates the quantity of a specific cart item for the authenticated user")
+    @Operation(summary = "Update cart item quantity", description = "Updates the quantity of a specific cart item for the authenticated user",
+            security = { @SecurityRequirement(name = "bearerAuth") } )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cart item updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+            @ApiResponse(responseCode = "403", description = "Forbidden Access"),
+            @ApiResponse(responseCode = "404", description = "Cart item not found")
     })
     public ResponseEntity<CartItem> updateCartItemQuantity(
             @PathVariable Long cartItemId,
@@ -70,10 +77,12 @@ public class CartController {
     }
 
     @DeleteMapping("/items/{cartItemId}")
-    @Operation(summary = "Remove cart item", description = "Deletes a specific cart item from the authenticated user's cart")
+    @Operation(summary = "Remove cart item", description = "Deletes a specific cart item from the authenticated user's cart",
+            security = { @SecurityRequirement(name = "bearerAuth") } )
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Cart item removed successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+            @ApiResponse(responseCode = "403", description = "Forbidden Access"),
             @ApiResponse(responseCode = "404", description = "Cart item not found")
     })
     public ResponseEntity<Void> removeCartItem(@PathVariable Long cartItemId) {

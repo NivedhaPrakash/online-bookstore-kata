@@ -30,7 +30,6 @@ public class LoginController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login successful, JWT token returned"),
             @ApiResponse(responseCode = "400", description = "Invalid request data (validation failed)"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "401", description = "Invalid credentials"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })

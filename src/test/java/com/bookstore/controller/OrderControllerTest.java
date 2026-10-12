@@ -2,6 +2,7 @@ package com.bookstore.controller;
 
 import com.bookstore.entity.Order;
 import com.bookstore.entity.OrderStatus;
+import com.bookstore.entity.User;
 import com.bookstore.exception.*;
 import com.bookstore.service.OrderService;
 import com.bookstore.util.JwtTokenUtil;
@@ -49,11 +50,15 @@ class OrderControllerTest {
     @Test
     void shouldCheckoutCartAndReturnOrder() throws Exception {
         // Given: a mocked order returned by service
+        User user = new User();
+        user.setUsername("nive16");
+        user.setUserId(1L);
         Order order = new Order();
         order.setOrderId(10L);
         order.setTotalAmount(new BigDecimal("1000.00"));
         order.setStatus(OrderStatus.PLACED);
         order.setCreatedAt(LocalDateTime.now());
+        order.setUser(user);
 
         Mockito.when(orderService.checkout(anyLong(),anyString())).thenReturn(order);
 
