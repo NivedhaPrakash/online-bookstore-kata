@@ -4,19 +4,26 @@ import com.bookstore.entity.Order;
 import com.bookstore.entity.OrderStatus;
 import com.bookstore.exception.*;
 import com.bookstore.service.OrderService;
+import com.bookstore.util.JwtTokenUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -30,6 +37,15 @@ class OrderControllerTest {
     @MockitoBean
     private OrderService orderService;
 
+    @MockitoBean
+    private JwtTokenUtil jwtTokenUtil;
+
+    @BeforeEach
+    void setup() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("nive16", null, List.of());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
     @Test
     void shouldCheckoutCartAndReturnOrder() throws Exception {
         // Given: a mocked order returned by service
@@ -39,7 +55,7 @@ class OrderControllerTest {
         order.setStatus(OrderStatus.PLACED);
         order.setCreatedAt(LocalDateTime.now());
 
-        Mockito.when(orderService.checkout(anyLong())).thenReturn(order);
+        Mockito.when(orderService.checkout(anyLong(),anyString())).thenReturn(order);
 
         // When & Then: perform POST request
         mockMvc.perform(post("/api/orders/checkout/{cartId}", 100L)
@@ -52,7 +68,7 @@ class OrderControllerTest {
 
     @Test
     void shouldReturnBadRequestForEmptyCart() throws Exception {
-        Mockito.when(orderService.checkout(anyLong()))
+        Mockito.when(orderService.checkout(anyLong(),anyString()))
                 .thenThrow(new EmptyCartException("Cannot checkout an empty cart"));
 
         mockMvc.perform(post("/api/orders/checkout/{cartId}", 1L)
@@ -64,7 +80,7 @@ class OrderControllerTest {
 
     @Test
     void shouldReturnConflictForInsufficientStock() throws Exception {
-        Mockito.when(orderService.checkout(anyLong()))
+        Mockito.when(orderService.checkout(anyLong(),anyString()))
                 .thenThrow(new InsufficientStockException("Insufficient Stock"));
 
         mockMvc.perform(post("/api/orders/checkout/{cartId}", 1L))
@@ -75,7 +91,7 @@ class OrderControllerTest {
 
     @Test
     void shouldReturnForbidden() throws Exception {
-        Mockito.when(orderService.checkout(anyLong()))
+        Mockito.when(orderService.checkout(anyLong(),anyString()))
                 .thenThrow(new ForbiddenException("Access denied"));
 
         mockMvc.perform(post("/api/orders/checkout/{cartId}", 1L))

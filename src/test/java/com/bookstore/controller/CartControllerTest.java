@@ -5,12 +5,17 @@ import com.bookstore.entity.Cart;
 import com.bookstore.entity.CartItem;
 import com.bookstore.exception.CartNotFoundException;
 import com.bookstore.service.CartService;
+import com.bookstore.util.JwtTokenUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -33,6 +38,16 @@ public class CartControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockitoBean
+    private JwtTokenUtil jwtTokenUtil;
+
+    @BeforeEach
+    void setup() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("nive16", null, List.of());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+
     @Test
     void testAddBookToCart() throws Exception {
         //Given
@@ -49,7 +64,7 @@ public class CartControllerTest {
 
         CartItem savedCartItem = new CartItem(1L, cart, book, 2);
 
-        when(cartService.addBookToCart(100L,1L,2)).thenReturn(savedCartItem);
+        when(cartService.addBookToCart(100L,1L,2,"nive16")).thenReturn(savedCartItem);
 
         String requestBody = """
                 {
@@ -95,7 +110,7 @@ public class CartControllerTest {
         CartItem firstCartItem = new CartItem(1L, cart, firstBook, 2);
         CartItem secondCartItem = new CartItem(2L, cart, secondBook, 3);
         List<CartItem> cartItemList = Arrays.asList(firstCartItem,secondCartItem);
-        when(cartService.getAllCartItems(cartId)).thenReturn(cartItemList);
+        when(cartService.getAllCartItems(cartId,"nive16")).thenReturn(cartItemList);
 
         //When and Then
         mockMvc.perform(get("/api/carts/{cartId}/items",100L))
@@ -128,7 +143,7 @@ public class CartControllerTest {
         // Updated cart item with new quantity
         CartItem updatedCartItem = new CartItem(cartItemId, cart, book, 5);
 
-        when(cartService.updateCartItemQuantity(cartItemId, 5)).thenReturn(updatedCartItem);
+        when(cartService.updateCartItemQuantity(cartItemId, 5,"nive16")).thenReturn(updatedCartItem);
 
         String requestBody = """
             {
@@ -153,7 +168,7 @@ public class CartControllerTest {
         mockMvc.perform(delete("/api/carts/items/{cartItemId}", 1L))
                 .andExpect(status().isNoContent());
 
-        verify(cartService).removeCartItem(1L);
+        verify(cartService).removeCartItem(1L,"nive16");
     }
 
     @Test
@@ -168,7 +183,7 @@ public class CartControllerTest {
 
     @Test
     void shouldReturnCartNotFound() throws Exception {
-        Mockito.when(cartService.addBookToCart(anyLong(),anyLong(),anyInt()))
+        Mockito.when(cartService.addBookToCart(anyLong(),anyLong(),anyInt(),anyString()))
                 .thenThrow(new CartNotFoundException("Cart Not Found"));
 
         String requestBody = """

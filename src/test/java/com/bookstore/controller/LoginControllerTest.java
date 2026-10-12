@@ -2,9 +2,11 @@ package com.bookstore.controller;
 
 import com.bookstore.config.SecurityConfig;
 import com.bookstore.service.LoginService;
+import com.bookstore.util.JwtTokenUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -17,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(LoginController.class)
 @Import(SecurityConfig.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class LoginControllerTest {
 
     @Autowired
@@ -24,6 +27,9 @@ public class LoginControllerTest {
 
     @MockitoBean
     private LoginService loginService;
+
+    @MockitoBean
+    private JwtTokenUtil jwtTokenUtil;
 
     @Test
     void testLoginSuccess() throws Exception {
