@@ -1,10 +1,13 @@
 package com.bookstore.controller;
 
 import com.bookstore.config.SecurityConfig;
+import com.bookstore.entity.Cart;
 import com.bookstore.entity.User;
-import com.bookstore.service.UserService;
+import com.bookstore.service.RegisterService;
+import com.bookstore.util.JwtTokenUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -17,15 +20,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@WebMvcTest(UserRegisterController.class)
 @Import(SecurityConfig.class)
-public class UserControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+public class UserRegisterControllerTest {
 
     @MockitoBean
-    private UserService userService;
+    private RegisterService registerService;
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private JwtTokenUtil jwtTokenUtil;
 
     @Test
     void testShouldRegisterNewUser() throws Exception {
@@ -40,7 +47,12 @@ public class UserControllerTest {
         User user = new User();
         user.setUsername("nive16");
         user.setPassword("password123");
-        when(userService.register(any(User.class))).thenReturn(user);
+
+        Cart userCart = new Cart();
+        userCart.setUser(user);
+        userCart.setCartId(100L);
+
+        when(registerService.register(any(User.class))).thenReturn(userCart);
 
         // When & Then: Register API called, expect 201 Created
         mockMvc.perform(post("/api/auth/register")
