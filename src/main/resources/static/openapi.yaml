@@ -116,8 +116,8 @@ paths:
                     format: int32
                 required:
                 - quantity
-        "401":
-          description: Unauthorized access
+        "403":
+          description: Forbidden Access
           content:
             '*/*':
               schema:
@@ -151,6 +151,43 @@ paths:
                     format: int32
                 required:
                 - quantity
+        "404":
+          description: Cart item not found
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+      security:
+      - bearerAuth: []
     delete:
       tags:
       - Cart Management
@@ -169,8 +206,12 @@ paths:
           description: Cart item removed successfully
         "401":
           description: Unauthorized access
+        "403":
+          description: Forbidden Access
         "404":
           description: Cart item not found
+      security:
+      - bearerAuth: []
   /api/orders/checkout/{cartId}:
     post:
       tags:
@@ -202,23 +243,26 @@ paths:
                       userId:
                         type: integer
                         format: int64
+                        description: Unique identifier of the user
+                        example: 1
                       username:
                         type: string
-                      password:
-                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
                   totalAmount:
                     type: number
                   status:
                     type: string
-                    enum:
-                    - PLACED
                   createdAt:
                     type: string
                     format: date-time
-                required:
-                - status
         "400":
-          description: Invalid request or insufficient stock
+          description: Invalid request
           content:
             '*/*':
               schema:
@@ -233,21 +277,24 @@ paths:
                       userId:
                         type: integer
                         format: int64
+                        description: Unique identifier of the user
+                        example: 1
                       username:
                         type: string
-                      password:
-                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
                   totalAmount:
                     type: number
                   status:
                     type: string
-                    enum:
-                    - PLACED
                   createdAt:
                     type: string
                     format: date-time
-                required:
-                - status
         "401":
           description: Unauthorized access (JWT missing or invalid)
           content:
@@ -264,23 +311,26 @@ paths:
                       userId:
                         type: integer
                         format: int64
+                        description: Unique identifier of the user
+                        example: 1
                       username:
                         type: string
-                      password:
-                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
                   totalAmount:
                     type: number
                   status:
                     type: string
-                    enum:
-                    - PLACED
                   createdAt:
                     type: string
                     format: date-time
-                required:
-                - status
         "403":
-          description: Forbidden – cart does not belong to the user
+          description: Forbidden Access
           content:
             '*/*':
               schema:
@@ -295,21 +345,24 @@ paths:
                       userId:
                         type: integer
                         format: int64
+                        description: Unique identifier of the user
+                        example: 1
                       username:
                         type: string
-                      password:
-                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
                   totalAmount:
                     type: number
                   status:
                     type: string
-                    enum:
-                    - PLACED
                   createdAt:
                     type: string
                     format: date-time
-                required:
-                - status
         "404":
           description: Cart not found
           content:
@@ -326,21 +379,58 @@ paths:
                       userId:
                         type: integer
                         format: int64
+                        description: Unique identifier of the user
+                        example: 1
                       username:
                         type: string
-                      password:
-                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
                   totalAmount:
                     type: number
                   status:
                     type: string
-                    enum:
-                    - PLACED
                   createdAt:
                     type: string
                     format: date-time
-                required:
-                - status
+        "409":
+          description: Insufficient stock
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                    format: int64
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the user
+                        example: 1
+                      username:
+                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
+                  totalAmount:
+                    type: number
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
         "500":
           description: Internal server error
           content:
@@ -357,21 +447,26 @@ paths:
                       userId:
                         type: integer
                         format: int64
+                        description: Unique identifier of the user
+                        example: 1
                       username:
                         type: string
-                      password:
-                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
                   totalAmount:
                     type: number
                   status:
                     type: string
-                    enum:
-                    - PLACED
                   createdAt:
                     type: string
                     format: date-time
-                required:
-                - status
+      security:
+      - bearerAuth: []
   /api/carts/{cartId}/items:
     get:
       tags:
@@ -461,6 +556,45 @@ paths:
                       format: int32
                   required:
                   - quantity
+        "403":
+          description: Forbidden Access
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    cartItemId:
+                      type: integer
+                      format: int64
+                    book:
+                      type: object
+                      properties:
+                        bookId:
+                          type: integer
+                          format: int64
+                        title:
+                          type: string
+                          minLength: 1
+                        author:
+                          type: string
+                          minLength: 1
+                        price:
+                          type: number
+                        availableStock:
+                          type: integer
+                          format: int32
+                      required:
+                      - author
+                      - title
+                    quantity:
+                      type: integer
+                      format: int32
+                  required:
+                  - quantity
+      security:
+      - bearerAuth: []
     post:
       tags:
       - Cart Management
@@ -484,7 +618,7 @@ paths:
                   type: integer
                   format: int64
                   description: ID of the book to add
-                  example: 101
+                  example: 1
                 quantity:
                   type: integer
                   format: int32
@@ -600,6 +734,43 @@ paths:
                     format: int32
                 required:
                 - quantity
+        "403":
+          description: Forbidden Access
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+      security:
+      - bearerAuth: []
   /api/auth/register:
     post:
       tags:
@@ -644,12 +815,12 @@ paths:
                   username:
                     type: string
                     description: Username of the registered user
-                    example: john_doe
+                    example: nive16
                   cartId:
                     type: integer
                     format: int64
                     description: Unique identifier of the associated cart
-                    example: 101
+                    example: 1
         "400":
           description: Invalid input
           content:
@@ -665,12 +836,12 @@ paths:
                   username:
                     type: string
                     description: Username of the registered user
-                    example: john_doe
+                    example: nive16
                   cartId:
                     type: integer
                     format: int64
                     description: Unique identifier of the associated cart
-                    example: 101
+                    example: 1
         "409":
           description: Username already exists
           content:
@@ -686,12 +857,12 @@ paths:
                   username:
                     type: string
                     description: Username of the registered user
-                    example: john_doe
+                    example: nive16
                   cartId:
                     type: integer
                     format: int64
                     description: Unique identifier of the associated cart
-                    example: 101
+                    example: 1
   /api/auth/login:
     post:
       tags:
@@ -763,26 +934,6 @@ paths:
                     example: 600
         "401":
           description: Invalid credentials
-          content:
-            '*/*':
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                    description: JWT authentication token
-                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
-                  username:
-                    type: string
-                    description: Username of the authenticated user
-                    example: nive16
-                  expiresIn:
-                    type: integer
-                    format: int32
-                    description: Token expiry time in seconds
-                    example: 600
-        "404":
-          description: User not found
           content:
             '*/*':
               schema:
@@ -1032,7 +1183,7 @@ components:
           format: int32
       required:
       - quantity
-    Order:
+    OrderResponse:
       type: object
       properties:
         orderId:
@@ -1044,31 +1195,41 @@ components:
             userId:
               type: integer
               format: int64
+              description: Unique identifier of the user
+              example: 1
             username:
               type: string
-            password:
-              type: string
+              description: Username of the registered user
+              example: nive16
+            cartId:
+              type: integer
+              format: int64
+              description: Unique identifier of the associated cart
+              example: 1
         totalAmount:
           type: number
         status:
           type: string
-          enum:
-          - PLACED
         createdAt:
           type: string
           format: date-time
-      required:
-      - status
-    User:
+    UserResponse:
       type: object
       properties:
         userId:
           type: integer
           format: int64
+          description: Unique identifier of the user
+          example: 1
         username:
           type: string
-        password:
-          type: string
+          description: Username of the registered user
+          example: nive16
+        cartId:
+          type: integer
+          format: int64
+          description: Unique identifier of the associated cart
+          example: 1
     AddCartItemRequest:
       type: object
       properties:
@@ -1076,7 +1237,7 @@ components:
           type: integer
           format: int64
           description: ID of the book to add
-          example: 101
+          example: 1
         quantity:
           type: integer
           format: int32
@@ -1102,23 +1263,6 @@ components:
       required:
       - password
       - username
-    UserResponse:
-      type: object
-      properties:
-        userId:
-          type: integer
-          format: int64
-          description: Unique identifier of the user
-          example: 1
-        username:
-          type: string
-          description: Username of the registered user
-          example: john_doe
-        cartId:
-          type: integer
-          format: int64
-          description: Unique identifier of the associated cart
-          example: 101
     LoginRequest:
       type: object
       properties:
@@ -1152,3 +1296,8 @@ components:
           format: int32
           description: Token expiry time in seconds
           example: 600
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
