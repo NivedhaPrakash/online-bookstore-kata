@@ -1,19 +1,16 @@
 package com.bookstore.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserResponse {
+public record UserResponse(
 
-    private Long userId;
+        @Schema(description = "Unique identifier of the user", example = "1")
+        Long userId,
 
-    private String username;
+        @Schema(description = "Username of the registered user", example = "john_doe")
+        String username,
 
-    private Long cartId;
-}
+        @Schema(description = "Unique identifier of the associated cart", example = "101")
+        Long cartId
+
+) {}

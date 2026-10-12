@@ -1,20 +1,16 @@
 package com.bookstore.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class LoginResponse {
+public record LoginResponse(
 
-    private String token;
+        @Schema(description = "JWT authentication token", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6...")
+        String token,
 
-    private String username;
+        @Schema(description = "Username of the authenticated user", example = "nive16")
+        String username,
 
-    private int expiresIn;
-}
+        @Schema(description = "Token expiry time in seconds", example = "600")
+        int expiresIn
 
+) {}
