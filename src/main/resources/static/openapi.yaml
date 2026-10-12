@@ -1,0 +1,1303 @@
+openapi: 3.1.0
+info:
+  title: Online Bookstore API
+  description: "API documentation for registration, login, cart, and order flows"
+  version: v1.0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Books
+  description: Public APIs for browsing books
+- name: Authentication
+  description: User registration and login APIs
+- name: Cart Management
+  description: Operations for managing cart items
+- name: Orders
+  description: Operations for placing and managing orders
+paths:
+  /api/carts/items/{cartItemId}:
+    put:
+      tags:
+      - Cart Management
+      summary: Update cart item quantity
+      description: Updates the quantity of a specific cart item for the authenticated user
+      operationId: updateCartItemQuantity
+      parameters:
+      - name: cartItemId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  format: int32
+                  description: Quantity of the cart item to update
+                  example: 3
+                  minimum: 1
+              required:
+              - quantity
+        required: true
+      responses:
+        "200":
+          description: Cart item updated successfully
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+        "400":
+          description: Invalid request data
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+        "403":
+          description: Forbidden Access
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+        "404":
+          description: Cart item not found
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Cart Management
+      summary: Remove cart item
+      description: Deletes a specific cart item from the authenticated user's cart
+      operationId: removeCartItem
+      parameters:
+      - name: cartItemId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Cart item removed successfully
+        "401":
+          description: Unauthorized access
+        "403":
+          description: Forbidden Access
+        "404":
+          description: Cart item not found
+      security:
+      - bearerAuth: []
+  /api/orders/checkout/{cartId}:
+    post:
+      tags:
+      - Orders
+      summary: Checkout cart
+      description: Places an order for the specified cart belonging to the authenticated user
+      operationId: checkout
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "201":
+          description: Order placed successfully
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                    format: int64
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the user
+                        example: 1
+                      username:
+                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
+                  totalAmount:
+                    type: number
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        "400":
+          description: Invalid request
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                    format: int64
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the user
+                        example: 1
+                      username:
+                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
+                  totalAmount:
+                    type: number
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        "401":
+          description: Unauthorized access (JWT missing or invalid)
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                    format: int64
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the user
+                        example: 1
+                      username:
+                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
+                  totalAmount:
+                    type: number
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        "403":
+          description: Forbidden Access
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                    format: int64
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the user
+                        example: 1
+                      username:
+                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
+                  totalAmount:
+                    type: number
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        "404":
+          description: Cart not found
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                    format: int64
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the user
+                        example: 1
+                      username:
+                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
+                  totalAmount:
+                    type: number
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        "409":
+          description: Insufficient stock
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                    format: int64
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the user
+                        example: 1
+                      username:
+                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
+                  totalAmount:
+                    type: number
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+        "500":
+          description: Internal server error
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: integer
+                    format: int64
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the user
+                        example: 1
+                      username:
+                        type: string
+                        description: Username of the registered user
+                        example: nive16
+                      cartId:
+                        type: integer
+                        format: int64
+                        description: Unique identifier of the associated cart
+                        example: 1
+                  totalAmount:
+                    type: number
+                  status:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+      security:
+      - bearerAuth: []
+  /api/carts/{cartId}/items:
+    get:
+      tags:
+      - Cart Management
+      summary: Retrieve all cart items
+      description: Fetches all items in the specified cart for the authenticated user
+      operationId: retrieveAllCartItems
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Cart items retrieved successfully
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    cartItemId:
+                      type: integer
+                      format: int64
+                    book:
+                      type: object
+                      properties:
+                        bookId:
+                          type: integer
+                          format: int64
+                        title:
+                          type: string
+                          minLength: 1
+                        author:
+                          type: string
+                          minLength: 1
+                        price:
+                          type: number
+                        availableStock:
+                          type: integer
+                          format: int32
+                      required:
+                      - author
+                      - title
+                    quantity:
+                      type: integer
+                      format: int32
+                  required:
+                  - quantity
+        "401":
+          description: Unauthorized access
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    cartItemId:
+                      type: integer
+                      format: int64
+                    book:
+                      type: object
+                      properties:
+                        bookId:
+                          type: integer
+                          format: int64
+                        title:
+                          type: string
+                          minLength: 1
+                        author:
+                          type: string
+                          minLength: 1
+                        price:
+                          type: number
+                        availableStock:
+                          type: integer
+                          format: int32
+                      required:
+                      - author
+                      - title
+                    quantity:
+                      type: integer
+                      format: int32
+                  required:
+                  - quantity
+        "403":
+          description: Forbidden Access
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    cartItemId:
+                      type: integer
+                      format: int64
+                    book:
+                      type: object
+                      properties:
+                        bookId:
+                          type: integer
+                          format: int64
+                        title:
+                          type: string
+                          minLength: 1
+                        author:
+                          type: string
+                          minLength: 1
+                        price:
+                          type: number
+                        availableStock:
+                          type: integer
+                          format: int32
+                      required:
+                      - author
+                      - title
+                    quantity:
+                      type: integer
+                      format: int32
+                  required:
+                  - quantity
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Cart Management
+      summary: Add book to cart
+      description: Adds a book to the specified cart for the authenticated user
+      operationId: addBookToCart
+      parameters:
+      - name: cartId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bookId:
+                  type: integer
+                  format: int64
+                  description: ID of the book to add
+                  example: 1
+                quantity:
+                  type: integer
+                  format: int32
+                  description: Quantity of the book to add
+                  example: 2
+              required:
+              - bookId
+              - quantity
+        required: true
+      responses:
+        "201":
+          description: Book added to cart successfully
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+        "400":
+          description: Invalid request data
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+        "401":
+          description: Unauthorized access
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+        "403":
+          description: Forbidden Access
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  cartItemId:
+                    type: integer
+                    format: int64
+                  book:
+                    type: object
+                    properties:
+                      bookId:
+                        type: integer
+                        format: int64
+                      title:
+                        type: string
+                        minLength: 1
+                      author:
+                        type: string
+                        minLength: 1
+                      price:
+                        type: number
+                      availableStock:
+                        type: integer
+                        format: int32
+                    required:
+                    - author
+                    - title
+                  quantity:
+                    type: integer
+                    format: int32
+                required:
+                - quantity
+      security:
+      - bearerAuth: []
+  /api/auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register user
+      description: "Registers a new user, validates ownership, and returns the saved user along with an associated cart."
+      operationId: registerUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Unique username
+                  example: nive16
+                  minLength: 1
+                password:
+                  type: string
+                  description: Password for the account
+                  example: mypassword123
+                  maxLength: 2147483647
+                  minLength: 8
+              required:
+              - password
+              - username
+        required: true
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                    format: int64
+                    description: Unique identifier of the user
+                    example: 1
+                  username:
+                    type: string
+                    description: Username of the registered user
+                    example: nive16
+                  cartId:
+                    type: integer
+                    format: int64
+                    description: Unique identifier of the associated cart
+                    example: 1
+        "400":
+          description: Invalid input
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                    format: int64
+                    description: Unique identifier of the user
+                    example: 1
+                  username:
+                    type: string
+                    description: Username of the registered user
+                    example: nive16
+                  cartId:
+                    type: integer
+                    format: int64
+                    description: Unique identifier of the associated cart
+                    example: 1
+        "409":
+          description: Username already exists
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                    format: int64
+                    description: Unique identifier of the user
+                    example: 1
+                  username:
+                    type: string
+                    description: Username of the registered user
+                    example: nive16
+                  cartId:
+                    type: integer
+                    format: int64
+                    description: Unique identifier of the associated cart
+                    example: 1
+  /api/auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: Login user
+      description: Authenticates user and returns JWT token.
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Unique username
+                  example: nive16
+                  minLength: 1
+                password:
+                  type: string
+                  description: Password for the account
+                  example: mypassword123
+                  maxLength: 2147483647
+                  minLength: 8
+              required:
+              - password
+              - username
+        required: true
+      responses:
+        "200":
+          description: "Login successful, JWT token returned"
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT authentication token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+                  username:
+                    type: string
+                    description: Username of the authenticated user
+                    example: nive16
+                  expiresIn:
+                    type: integer
+                    format: int32
+                    description: Token expiry time in seconds
+                    example: 600
+        "400":
+          description: Invalid request data (validation failed)
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT authentication token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+                  username:
+                    type: string
+                    description: Username of the authenticated user
+                    example: nive16
+                  expiresIn:
+                    type: integer
+                    format: int32
+                    description: Token expiry time in seconds
+                    example: 600
+        "401":
+          description: Invalid credentials
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT authentication token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+                  username:
+                    type: string
+                    description: Username of the authenticated user
+                    example: nive16
+                  expiresIn:
+                    type: integer
+                    format: int32
+                    description: Token expiry time in seconds
+                    example: 600
+        "500":
+          description: Internal server error
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT authentication token
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+                  username:
+                    type: string
+                    description: Username of the authenticated user
+                    example: nive16
+                  expiresIn:
+                    type: integer
+                    format: int32
+                    description: Token expiry time in seconds
+                    example: 600
+  /api/books:
+    get:
+      tags:
+      - Books
+      summary: Get all books
+      description: Retrieves a list of all available books
+      operationId: getAllBooks
+      responses:
+        "200":
+          description: Books retrieved successfully
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    bookId:
+                      type: integer
+                      format: int64
+                    title:
+                      type: string
+                      minLength: 1
+                    author:
+                      type: string
+                      minLength: 1
+                    price:
+                      type: number
+                    availableStock:
+                      type: integer
+                      format: int32
+                  required:
+                  - author
+                  - title
+        "500":
+          description: Internal server error
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    bookId:
+                      type: integer
+                      format: int64
+                    title:
+                      type: string
+                      minLength: 1
+                    author:
+                      type: string
+                      minLength: 1
+                    price:
+                      type: number
+                    availableStock:
+                      type: integer
+                      format: int32
+                  required:
+                  - author
+                  - title
+  /api/books/{id}:
+    get:
+      tags:
+      - Books
+      summary: Get book by ID
+      description: Fetches details of a specific book by its ID
+      operationId: getBookById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Book retrieved successfully
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  bookId:
+                    type: integer
+                    format: int64
+                  title:
+                    type: string
+                    minLength: 1
+                  author:
+                    type: string
+                    minLength: 1
+                  price:
+                    type: number
+                  availableStock:
+                    type: integer
+                    format: int32
+                required:
+                - author
+                - title
+        "404":
+          description: Book not found
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  bookId:
+                    type: integer
+                    format: int64
+                  title:
+                    type: string
+                    minLength: 1
+                  author:
+                    type: string
+                    minLength: 1
+                  price:
+                    type: number
+                  availableStock:
+                    type: integer
+                    format: int32
+                required:
+                - author
+                - title
+        "500":
+          description: Internal server error
+          content:
+            '*/*':
+              schema:
+                type: object
+                properties:
+                  bookId:
+                    type: integer
+                    format: int64
+                  title:
+                    type: string
+                    minLength: 1
+                  author:
+                    type: string
+                    minLength: 1
+                  price:
+                    type: number
+                  availableStock:
+                    type: integer
+                    format: int32
+                required:
+                - author
+                - title
+components:
+  schemas:
+    UpdateQuantityRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          format: int32
+          description: Quantity of the cart item to update
+          example: 3
+          minimum: 1
+      required:
+      - quantity
+    Book:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int64
+        title:
+          type: string
+          minLength: 1
+        author:
+          type: string
+          minLength: 1
+        price:
+          type: number
+        availableStock:
+          type: integer
+          format: int32
+      required:
+      - author
+      - title
+    CartItem:
+      type: object
+      properties:
+        cartItemId:
+          type: integer
+          format: int64
+        book:
+          type: object
+          properties:
+            bookId:
+              type: integer
+              format: int64
+            title:
+              type: string
+              minLength: 1
+            author:
+              type: string
+              minLength: 1
+            price:
+              type: number
+            availableStock:
+              type: integer
+              format: int32
+          required:
+          - author
+          - title
+        quantity:
+          type: integer
+          format: int32
+      required:
+      - quantity
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        user:
+          type: object
+          properties:
+            userId:
+              type: integer
+              format: int64
+              description: Unique identifier of the user
+              example: 1
+            username:
+              type: string
+              description: Username of the registered user
+              example: nive16
+            cartId:
+              type: integer
+              format: int64
+              description: Unique identifier of the associated cart
+              example: 1
+        totalAmount:
+          type: number
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    UserResponse:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          description: Unique identifier of the user
+          example: 1
+        username:
+          type: string
+          description: Username of the registered user
+          example: nive16
+        cartId:
+          type: integer
+          format: int64
+          description: Unique identifier of the associated cart
+          example: 1
+    AddCartItemRequest:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int64
+          description: ID of the book to add
+          example: 1
+        quantity:
+          type: integer
+          format: int32
+          description: Quantity of the book to add
+          example: 2
+      required:
+      - bookId
+      - quantity
+    UserRegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Unique username
+          example: nive16
+          minLength: 1
+        password:
+          type: string
+          description: Password for the account
+          example: mypassword123
+          maxLength: 2147483647
+          minLength: 8
+      required:
+      - password
+      - username
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Unique username
+          example: nive16
+          minLength: 1
+        password:
+          type: string
+          description: Password for the account
+          example: mypassword123
+          maxLength: 2147483647
+          minLength: 8
+      required:
+      - password
+      - username
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+        username:
+          type: string
+          description: Username of the authenticated user
+          example: nive16
+        expiresIn:
+          type: integer
+          format: int32
+          description: Token expiry time in seconds
+          example: 600
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

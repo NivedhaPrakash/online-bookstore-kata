@@ -1,17 +1,14 @@
 package com.bookstore.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
 
-@Getter
-@Setter
-@NoArgsConstructor(force = true)
-public class UpdateQuantityRequest {
+public record UpdateQuantityRequest(
 
-    @NonNull
-    @Min(1)
-    private Integer quantity;
-}
+        @NotNull
+        @Min(1)
+        @Schema(description = "Quantity of the cart item to update", example = "3")
+        Integer quantity
+
+) {}

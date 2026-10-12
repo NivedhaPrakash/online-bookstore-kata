@@ -1,20 +1,18 @@
 package com.bookstore.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class AddCartItemRequest {
+public record AddCartItemRequest(
 
-    @NotNull
-    private Long bookId;
+        @NotNull
+        @Schema(description = "ID of the book to add", example = "1")
+        Long bookId,
 
-    @NotNull
-    @Positive
-    private Integer quantity;
-}
+        @NotNull
+        @Positive
+        @Schema(description = "Quantity of the book to add", example = "2")
+        Integer quantity
+
+) {}
