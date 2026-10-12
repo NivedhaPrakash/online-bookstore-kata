@@ -2,7 +2,7 @@ package com.bookstore.service;
 
 import com.bookstore.entity.User;
 import com.bookstore.exception.BadCredentialsException;
-import com.bookstore.exception.UserNameNotFoundException;
+import com.bookstore.exception.InvalidFieldException;
 import com.bookstore.repository.UserRepository;
 import com.bookstore.util.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class LoginService {
     public String login(String username, String password) {
 
         if(!userRepository.existsByUsername(username)){
-            throw new UserNameNotFoundException("User not found");
+            throw new InvalidFieldException("Invalid username or password");
         }
 
         User user = userRepository.findByUsername(username);
