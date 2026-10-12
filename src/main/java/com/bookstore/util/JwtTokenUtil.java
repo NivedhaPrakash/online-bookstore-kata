@@ -1,6 +1,7 @@
 package com.bookstore.util;
 
 import com.bookstore.entity.User;
+import com.bookstore.exception.UnauthorizedException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -13,7 +14,7 @@ import java.util.Date;
 public class JwtTokenUtil {
 
     private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long EXPIRATION_TIME = 2 * 60 * 1000;
+    private final long EXPIRATION_TIME = 20 * 60 * 1000;
 
     public String generateToken(String username) {
         return Jwts.builder()
@@ -32,12 +33,21 @@ public class JwtTokenUtil {
                 .getSubject();
     }
 
-    public boolean validateToken(String token, User userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public String validateAndGetUsername(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Missing or invalid Authorization header");
+        }
+
+        String token = authHeader.substring(7);
+
+        if (isTokenExpired(token)) {
+            throw new UnauthorizedException("Token expired");
+        }
+
+        return extractUsername(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         Date expiration = Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)
